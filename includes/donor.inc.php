@@ -1,81 +1,186 @@
-<?php # - donor's.inc.php
-	
-	 // Display the form:
-?>
-     
-    
-     <form action="donor.php" method="POST">
-    <fieldset><legend>Enter your information in the form below:	
-    </legend>
-        <p><label>Last Name: <input type="text" name="last_name" placeholder = "Enter your last name"
-        value="<?php if (isset($_POST['last_name'])) echo $_POST ['last_name']; ?>"/></label>
-        </p>
+<?php
+require_once('db_class/donor.class.php');
+include('includes/currency_rates.php');
+include('includes/currency_converter.php');
 
-        <p><label>First Name: <input type="text" name="first_name" placeholder="Enter your first name"
-        value="<?php if (isset($_POST['first_name'])) echo $_POST ['first_name']; ?>" /></label>
-        </p>
+$conn = new Database();
+$adapter = $conn->getDefaultAdapter();
+$db = $conn->connect($adapter);
+$donors = new Donor($db);
 
-        <p><label>Street Address: <input type="text" name="s_address" placeholder="Enter your street address" value="<?php if (isset($_POST['s_address'])) echo $_POST ['s_address']; ?>"/></label>
-        </p>
+if(isset($_GET['id']) && isset($_GET['action'])){
+    $action = htmlspecialchars($_GET['action']);
+    $id = htmlspecialchars($_GET['id']);
+    if(filter_var($id,FILTER_VALIDATE_INT) && $action == "edit"){
+        $edit_donor = $donors->getDonor($id);
+    }
+}
 
-        <p><label>City: <input type="text" name="city" placeholder="Enter your city" value="<?php if (isset($_POST['city'])) echo $_POST ['city']; ?>"/></label>
-        </p>
+if(!empty($_POST)){
+    $donor_values = $_POST;
+}else if(isset($edit_donor)){
+    $donor_values = $edit_donor;
+}
+  
 
-        <p><label>country: <select name="country">
-	 	 	 <option value="africa"<?php if (isset($_POST['country']) && ($_POST['country'] == 'africa'))
-                echo 'selected="selected"'; ?>>Africa</option>
-               <option value="uk"<?php if (isset($_POST['country']) && ($_POST['country'] == 'uk'))
-                echo 'selected="selected"'; ?>>Uk</option>
-          </select></label></p>
+if (isset($_POST['review'])) {
+    $errors = array();
+    //validations
+    if (empty($_POST['last_name'])) {
+        $errors[] = "Please enter your last name";
+    } else {
+        $last_name = htmlspecialchars(trim($_POST['last_name']));
+    }
 
-        <p><label>State/Region: <input type="text" name="d_state" placeholder="Enter your state/region" value="<?php if (isset($_POST['d_state'])) echo $_POST ['d_state']; ?>"/></label>
-        </p>
+    if (empty($_POST['first_name'])) {
+        $errors[] = "Please enter your first name";
+    } else {
+        $first_name = htmlspecialchars(trim($_POST['first_name']));
+    }
 
-        <!--  -->
+    if (empty($_POST['s_address'])) {
+        $errors[] = "Please enter your address";
+    } else {
+        $s_address = htmlspecialchars(trim($_POST['s_address']));
+    }
 
-        <p><label>Postal Code/Region: <input type="text" name="postal_code" placeholder="Enter your postal code" value="<?php if (isset($_POST['postal_code'])) echo $_POST ['postal_code']; ?>"/></label>
-        </p>
+    if (empty($_POST['city'])) {
+        $errors[] = "Please enter your city";
+    } else {
+        $city = htmlspecialchars(trim($_POST['city']));
+    }
 
-        <p><label>Phone number: <input type="text" name="phone_number" placeholder="Enter your phone number" value="<?php if (isset($_POST['phone_number'])) echo $_POST ['phone_number']; ?>"/></label>
-        </p>
+    if (empty($_POST['country'])) {
+        $errors[] = "Please enter your country";
+    } else {
+        $country = htmlspecialchars(trim($_POST['country']));
+    }
 
-        <p><label>Email: <input type="text" name="email" placeholder="Enter your email address" value="<?php if (isset($_POST['email'])) echo $_POST ['email']; ?>"/></label>
-        </p>
+    if (empty($_POST['d_state'])) {
+        $errors[] = "Please enter your state/region";
+    } else {
+        $d_state = htmlspecialchars(trim($_POST['d_state']));
+    }
 
-        <p><label>Preferred form of contact: <select name="p_contact">
-	 	 	 <option value="phone"<?php if (isset($_POST['p_contact']) && ($_POST['p_contact'] == 'phone'))
-                echo 'selected="selected"'; ?>>Phone</option>
-               <option value="email"<?php if (isset($_POST['p_contact']) && ($_POST['p_contact'] == 'email'))
-                echo 'selected="selected"'; ?>>Email</option>
-          </select></label></p>
-          
-          <p><label>Preferred form of payment: <select name="p_payment">
-	 	 	 <option value="usd"<?php if (isset($_POST['p_payment']) && ($_POST['p_payment'] == 'usd'))
-                echo 'selected="selected"'; ?>>USD</option>
-               <option value="euro"<?php if (isset($_POST['p_payment']) && ($_POST['p_payment'] == 'euro'))
-                echo 'selected="selected"'; ?>>Euro</option>
-               <option value="bitcon"<?php if (isset($_POST['p_payment']) && ($_POST['p_payment'] == 'bitcon'))
-                echo 'selected="selected"'; ?>>Bitcoin</option>
-          </select></label></p>
-          
-          <p><label>Frequency of Donation: <select name="f_donation">
-	 	 	 <option value="monthly"<?php if (isset($_POST['f_donation']) && ($_POST['f_donation'] == 'monthly'))
-                echo 'selected="selected"'; ?>>Monthly</option>
-               <option value="yearly"<?php if (isset($_POST['f_donation']) && ($_POST['f_donation'] == 'yearly'))
-                echo 'selected="selected"'; ?>>Yearly</option>
-               <option value="one_time"<?php if (isset($_POST['f_donation']) && ($_POST['f_donation'] == 'onetime'))
-                echo 'selected="selected"'; ?>>One Time</option>
-          </select></label></p>
-          
+    if (empty($_POST['postal_code'])) {
+        $errors[] = "Please enter your postal/code";
+    } else {
+        $postal_code = htmlspecialchars(trim($_POST['postal_code']));
+    }
 
-          <!-- <p><label>Currency:
-              $ <input type="number" min="0.01" step="0.01" max="2500" value="25.67" /></label>
-        </p>      
-         -->
-        <p><label>Comments: <textarea name="comment" rows="3" cols="40"><?php if (isset($_POST['comment'])) echo $_POST ['comment']; ?></textarea></label></p>
-      
- 	 </fieldset>	 	
-	 	 <p align="center"><input type="submit" name="review" value="Submit My Information" /></p>
-    </form>
-	
-	 <?php include ('includes/footer.html'); ?>
+    if (empty($_POST['phone_number'])) {
+        $errors[] = "Please enter your phone_number";
+    } else {
+        $phone_number = htmlspecialchars(trim($_POST['phone_number']));
+    }
+
+    if (empty($_POST['email'])) {
+        $errors[] = "Please enter your email";
+    } else if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Please provide a valid email";
+    } else {
+        $email = htmlspecialchars(trim($_POST['email']));
+    }
+
+    if (empty($_POST['p_contact'])) {
+        $errors[] = "Please enter your preferred form of contact";
+    } else {
+        $p_contact = htmlspecialchars(trim($_POST['p_contact']));
+    }
+
+    if (empty($_POST['amount'])) {
+        $errors[] = "Please enter your amount of donation";
+    } else {
+        $amount = htmlspecialchars(trim($_POST['amount']));
+    }
+
+    if (empty($_POST['p_payment']) && empty($_POST['amount'])) {
+        $errors[] = "Please enter your preferred form of payment";
+    } else {
+        $p_payment = htmlspecialchars($_POST['p_payment']);
+        $supported_currencies = ['usd','euro','bitcoin'];
+        if(in_array(strtolower($p_payment),$supported_currencies)){
+
+        $amount = CurrencyConverter::convert_to_dollar($p_payment,$amount,$btc_rate,$euro_rate);
+
+        } else {
+            $errors[] = "Please use a supported currency";
+        }
+    }
+
+    if (empty($_POST['f_donation'])) {
+        $errors[] = "Please enter your the frequency of your donation";
+    } else {
+        $f_donation = htmlspecialchars(trim($_POST['f_donation']));
+    }
+
+    if (empty($_POST['comment'])) {
+        $errors[] = "Please enter your comment";
+    } else {
+        $comment = htmlspecialchars(trim($_POST['comment']));
+    }
+
+    $edit_operation = false;
+    $donor_edit_id = null;
+
+    if(isset($_POST['donor_edit_id']) && !empty($_POST['donor_edit_id'])){
+        $donor_edit_id = htmlspecialchars($_POST['donor_edit_id']);
+        if(filter_var($donor_edit_id,FILTER_VALIDATE_INT)){
+            $edit_operation = true;
+        }
+    }
+
+    if (empty($errors)) {
+        if(!$edit_operation) {
+            $checkEmail = $donors->checkUniqueEmail($email);
+            if($checkEmail){
+                $errors[] = "Email already exist";
+            }
+        }else{
+            $checkEmailOnUpdate = $donors->checkEmailOnUpdate($email,$donor_edit_id);
+            if($checkEmailOnUpdate) {
+                $errors[] = "Email already exist";
+              }
+            }
+    }
+
+    if (empty($errors)) {
+        if(!$edit_operation) {
+            $inserted_donor_id = $donors->store($last_name, $first_name, $s_address, $city, $country,
+                $d_state, $postal_code, $phone_number, $email, $p_contact, $p_payment, $f_donation,
+                $amount, $comment);
+
+            if ($inserted_donor_id) {
+                //get the last inserted donor
+                $donor = $donors->getDonor($inserted_donor_id);
+                $_SESSION['user'] = $donor;
+                $_SESSION['message'] = "We have received your details! you are successfully registered";
+                header('Location:index.php?id='.$inserted_donor_id);
+                exit();
+            }
+        }else{
+
+            $result = $donors->update($donor_edit_id,$last_name, $first_name, $s_address, $city, $country,
+                $d_state, $postal_code, $phone_number, $email, $p_contact, $p_payment, $f_donation,
+                $amount, $comment);
+
+             if ($result) {
+                //get the last inserted donor
+                $donor = $donors->getDonor($donor_edit_id);
+                $_SESSION['user'] = $donor;
+                $_SESSION['message'] = "Thank you! your donation info was successfully updated";
+                header('Location:index.php?id='.$donor_edit_id);
+                exit();
+            }
+        }
+    } else {
+        echo '<h3>Errors: the following error occurred</h3>';
+        echo '<ul>';
+        foreach ($errors as $error) {
+            echo "<li style=\"color: red;\">$error</li>";
+        }
+        echo '</ul>';
+    }
+
+}
+
