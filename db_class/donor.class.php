@@ -97,7 +97,7 @@ class Donor
                        WHERE id = :id ";
         $stmt = $this->conn->prepare($sql);
         $result = $stmt->execute(
-            [   ':id' => $donor_id,
+            [':id' => $donor_id,
                 ':last_name' => $last_name,
                 ':first_name' => $first_name,
                 ':s_address' => $s_address,
@@ -116,49 +116,31 @@ class Donor
     }
 
     /**
+     * CHECK IF EMAIL EXISTS WITH A DONOR
      * @param $email [email address]
-     * @param $check_id [ check in-case it is the current donor being edited and null for a new donor]
      * @return bool [ result ]
      */
-    function checkUniqueEmail($email){
+    function checkUniqueEmail($email)
+    {
         // will be null for insert operations
         $sql = "SELECT * FROM $this->table WHERE email=:email  LIMIT 1";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([':email' => $email]);
         return $stmt->rowCount() >= 1;
-
-//        if($check_id == null){
-//            $sql = "SELECT * FROM $this->table WHERE email= :email LIMIT 1";
-//            $stmt = $this->conn->prepare($sql);
-//            $stmt->execute([':email' => $email]);
-//            return $stmt->rowCount() >= 1;
-//        }else{
-//            // will not be null for update operations
-//            $sql = "SELECT * FROM $this->table WHERE email= :email LIMIT 1";
-//            $stmt = $this->conn->prepare($sql);
-//            $stmt->execute([':email' => $email]);
-//            $result = $stmt->fetch();
-//            if(empty($result)){
-//                return false;
-//            }else {
-//                return $result['id'] != $check_id;
-//            }
-//        }
     }
-    public function checkEmailOnUpdate($email, $check_id){
+
+    /**
+     * CHECK IF EMAIL EXISTS WITH A DONOR AND ALLOW EXISTING USER ATTACHED TO UPDATE
+     * @param $email [email address]
+     * @param $check_id [ check if email is unique and if donor exist]
+     * @return bool [ result ]
+     */
+    public function checkEmailOnUpdate($email, $check_id)
+    {
         $sql = "SELECT * FROM $this->table WHERE email= :email AND id !=:id LIMIT 1";
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute([':email' => $email, ':id'=>$check_id]);
+        $stmt->execute([':email' => $email, ':id' => $check_id]);
         return $stmt->rowCount() >= 1;
     }
-
-    public function deleteDonor($id){
-        if($id == null) {
-            $sql = "DELETE FROM $this->table";
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute();
-        }
-    }
-
 
 }

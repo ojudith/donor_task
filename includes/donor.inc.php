@@ -8,21 +8,30 @@ $adapter = $conn->getDefaultAdapter();
 $db = $conn->connect($adapter);
 $donors = new Donor($db);
 
-if(isset($_GET['id']) && isset($_GET['action'])){
+
+/**
+ *  Retrieve a donor for edit
+ */
+if (isset($_GET['id']) && isset($_GET['action'])) {
     $action = htmlspecialchars($_GET['action']);
     $id = htmlspecialchars($_GET['id']);
-    if(filter_var($id,FILTER_VALIDATE_INT) && $action == "edit"){
+    if (filter_var($id, FILTER_VALIDATE_INT) && $action == "edit") {
         $edit_donor = $donors->getDonor($id);
     }
 }
 
-if(!empty($_POST)){
+/**
+ *  Set html form fields to retain values on failure or load a donor for edit
+ */
+if (!empty($_POST)) {
     $donor_values = $_POST;
-}else if(isset($edit_donor)){
+} else if (isset($edit_donor)) {
     $donor_values = $edit_donor;
 }
-  
 
+/**
+ *  Submit Handler to create and edit a donor
+ */
 if (isset($_POST['review'])) {
     $errors = array();
     //validations
@@ -97,11 +106,12 @@ if (isset($_POST['review'])) {
     if (empty($_POST['p_payment']) && empty($_POST['amount'])) {
         $errors[] = "Please enter your preferred form of payment";
     } else {
+        // validate for supported currency and perform conversion
         $p_payment = htmlspecialchars($_POST['p_payment']);
-        $supported_currencies = ['usd','euro','bitcoin'];
-        if(in_array(strtolower($p_payment),$supported_currencies)){
+        $supported_currencies = ['usd', 'euro', 'bitcoin'];
+        if (in_array(strtolower($p_payment), $supported_currencies)) {
 
-        $amount = CurrencyConverter::convert_to_dollar($p_payment,$amount,$btc_rate,$euro_rate);
+            $amount = CurrencyConverter::convert_to_dollar($p_payment, $amount, $btc_rate, $euro_rate);
 
         } else {
             $errors[] = "Please use a supported currency";
@@ -123,29 +133,33 @@ if (isset($_POST['review'])) {
     $edit_operation = false;
     $donor_edit_id = null;
 
-    if(isset($_POST['donor_edit_id']) && !empty($_POST['donor_edit_id'])){
+    // check if the current request is an edit operation
+    if (isset($_POST['donor_edit_id']) && !empty($_POST['donor_edit_id'])) {
         $donor_edit_id = htmlspecialchars($_POST['donor_edit_id']);
-        if(filter_var($donor_edit_id,FILTER_VALIDATE_INT)){
+        if (filter_var($donor_edit_id, FILTER_VALIDATE_INT)) {
             $edit_operation = true;
         }
     }
 
     if (empty($errors)) {
-        if(!$edit_operation) {
+        if (!$edit_operation) {
+            // check if email is unique for a new donation
             $checkEmail = $donors->checkUniqueEmail($email);
-            if($checkEmail){
+            if ($checkEmail) {
                 $errors[] = "Email already exist";
             }
-        }else{
-            $checkEmailOnUpdate = $donors->checkEmailOnUpdate($email,$donor_edit_id);
-            if($checkEmailOnUpdate) {
+        } else {
+            // allow an existing donor with current email pass/edit if it is current donor
+            $checkEmailOnUpdate = $donors->checkEmailOnUpdate($email, $donor_edit_id);
+            if ($checkEmailOnUpdate) {
                 $errors[] = "Email already exist";
-              }
             }
+        }
     }
 
     if (empty($errors)) {
-        if(!$edit_operation) {
+        if (!$edit_operation) {
+            //store donor entries
             $inserted_donor_id = $donors->store($last_name, $first_name, $s_address, $city, $country,
                 $d_state, $postal_code, $phone_number, $email, $p_contact, $p_payment, $f_donation,
                 $amount, $comment);
@@ -155,21 +169,21 @@ if (isset($_POST['review'])) {
                 $donor = $donors->getDonor($inserted_donor_id);
                 $_SESSION['user'] = $donor;
                 $_SESSION['message'] = "We have received your details! you are successfully registered";
-                header('Location:index.php?id='.$inserted_donor_id);
+                header('Location:index.php?id=' . $inserted_donor_id);
                 exit();
             }
-        }else{
-
-            $result = $donors->update($donor_edit_id,$last_name, $first_name, $s_address, $city, $country,
+        } else {
+            //update donor entries
+            $result = $donors->update($donor_edit_id, $last_name, $first_name, $s_address, $city, $country,
                 $d_state, $postal_code, $phone_number, $email, $p_contact, $p_payment, $f_donation,
                 $amount, $comment);
 
-             if ($result) {
+            if ($result) {
                 //get the last inserted donor
                 $donor = $donors->getDonor($donor_edit_id);
                 $_SESSION['user'] = $donor;
                 $_SESSION['message'] = "Thank you! your donation info was successfully updated";
-                header('Location:index.php?id='.$donor_edit_id);
+                header('Location:index.php?id=' . $donor_edit_id);
                 exit();
             }
         }

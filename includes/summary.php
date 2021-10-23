@@ -1,6 +1,7 @@
 <?php
 require_once('db_class/donor.class.php');
 
+// Retrieve a donor in Summary Page after a successful info entry
 if (isset($_GET['id'])) {
     $id = htmlspecialchars($_GET['id']);
     if (filter_var($id, FILTER_VALIDATE_INT)) {

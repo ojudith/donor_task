@@ -11,7 +11,14 @@ class Database
     private $db_connection;
     private $error;
 
-
+    /**
+     * Create custom connection configuration for database
+     * @param $db_host
+     * @param $db_user
+     * @param $db_pass
+     * @param $db_name
+     * @return array
+     */
     public function createAdapter($db_host, $db_user, $db_pass, $db_name)
     {
         return [
@@ -23,6 +30,10 @@ class Database
         ];
     }
 
+    /**
+     * Get default database connection
+     * @return string[]
+     */
     public function getDefaultAdapter()
     {
         return [
@@ -34,6 +45,11 @@ class Database
         ];
     }
 
+    /**
+     * Initialize database connection
+     * @param $adapter [the database configuration]
+     * @return PDO [DB instance]
+     */
     public function connect($adapter)
     {
         $conn = 'mysql:host=' . $adapter['db_host'] . ';dbname=' . $adapter['db_name'];

@@ -1,4 +1,4 @@
-# Project Title
+# Donor Info Submission Task
 
 Collect and store donor's information task
 
@@ -19,7 +19,7 @@ MySQL
 clone the project
 ```
 ```
-run composer install
+run: composer install
 ```
 ```
 import sql file
@@ -37,7 +37,7 @@ import sql file
 
 #### Built With
 
-* [PHP](http://www.php.net) - server side technology
+* [PHP](http://www.php.net) - server side technology / server-side validations
 * [MySQL](https://www.mysql.com/) - database
-* [javaScript](https://en.wikipedia.org/wiki/JavaScript/) - javascript
+* [javaScript](https://en.wikipedia.org/wiki/JavaScript/) - client-side validations
 

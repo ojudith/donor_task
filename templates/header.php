@@ -20,7 +20,7 @@ if(session_id() == null) {
         <nav>
             <h1><?php echo $page_title; ?></h1>
             <ul type="none"><li><a href="index.php">Home Page</a></li>
-                <li><a href="donor.php">Donate here</a></li>
+                <li><a href="donor.php">Donor Form</a></li>
             </ul>
         </nav>
     <div class="container">

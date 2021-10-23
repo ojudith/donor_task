@@ -2,6 +2,9 @@
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Class DonorsTest
+ */
 class DonorsTest extends DatabaseTest
 {
     /**
@@ -77,6 +80,9 @@ class DonorsTest extends DatabaseTest
         }
     }
 
+    /**
+     *  test to check unique email before inserting it into database
+     */
     public function test_unique_email(){
         $this->getConnection();
         $this->initialiseDonor();
@@ -98,6 +104,9 @@ class DonorsTest extends DatabaseTest
 
     }
 
+    /**
+     *  test to check unique email for a particular donor before inserting it into database
+     */
     public function test_unique_email_pass_for_particular_user(){
         $this->getConnection();
         $this->initialiseDonor();

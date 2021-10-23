@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @param $method [request method]
+ * @param $url [url]
+ * @param $data [params]
+ * @return bool|string
+ */
 function externalApiRequest($method, $url, $data)
 {
     $curl = curl_init();
@@ -31,6 +37,9 @@ function externalApiRequest($method, $url, $data)
 $btc_request = externalApiRequest('GET', 'https://api.coinbase.com/v2/exchange-rates?currency=BTC', false);
 $btc_response = json_decode($btc_request, true);
 
+/**
+ * Bitcoin and euro rates
+ */
 $btc_rate = $btc_response['data']['rates']['USD'];
 $euro_rate = 4.555;
 
